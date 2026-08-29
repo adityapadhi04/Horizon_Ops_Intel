@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://horizon-ops-intel-1.onrender.com',
         changeOrigin: true,
         secure: false
       }
