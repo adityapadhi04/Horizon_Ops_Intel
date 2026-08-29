@@ -269,6 +269,10 @@ function evaluateAlerts(db) {
 }
 
 // Helper for Predictive Overview calculation
+// Hackathon Rule-based Predictive Engine:
+// 1. Cluster Factor: Active High-risk disease clusters add 5 projected admissions/day; Medium-risk add 2.
+// 2. Seasonal Factor: Weather impacts admission projections (Rainy season adds 8 cases due to Dengue/Malaria; Winter adds 5; Summer adds 3).
+// 3. Expected Patient Surge admissions = base daily admissions + Cluster Factor + Seasonal Factor.
 function getPredictiveOverview(db) {
   const availableBeds = db.bed.filter(b => !b.occupied).length;
   
@@ -507,46 +511,54 @@ app.get('/api/conflicts', (req, res) => {
   const labRel = db.trustScores.lab;
 
   const mapped = db.activeConflicts.map(c => {
-    let relA = hisRel;
-    let relB = bedRel;
-    let nameA = 'Epic HIS';
-    let nameB = 'Nursing Bed Board';
-    let valA = c.sourceData?.his || 'Available';
-    let valB = c.sourceData?.bed || 'Occupied';
+    let reliabilityA = hisRel;
+    let reliabilityB = bedRel;
+    let sourceAName = 'Epic HIS';
+    let sourceBName = 'Nursing Bed Board';
+    let valueA = c.sourceData?.his || 'Available';
+    let valueB = c.sourceData?.bed || 'Occupied';
     let ward = c.description.includes('Ward C') || c.id.includes('C204') ? 'Ward C' : 'Ward B';
 
     if (c.type.includes('Lab') || c.sourceData?.lab) {
-      relB = labRel;
-      nameB = 'Cerner LIS';
-      valB = c.sourceData?.lab || 'Pending';
+      reliabilityB = labRel;
+      sourceBName = 'Cerner LIS';
+      valueB = c.sourceData?.lab || 'Pending';
     }
 
-    const diff = Math.abs(relA - relB);
+    const diff = Math.abs(reliabilityA - reliabilityB);
     let recommendation = 'Verification Required';
     let confidence = 'MEDIUM';
     let ruleApplied = 'Close Reliability Match';
-    let recValue = valA;
-    let recSource = nameA;
+    let recValue = valueA;
+    let recSource = sourceAName;
 
-    if (relA < 65 && relB < 65) {
+    // 3-Way Reconciliation Decision Rules:
+    // Rule 1: If both sources have extremely low trust (<65%), require human review.
+    if (reliabilityA < 65 && reliabilityB < 65) {
       recommendation = 'Human Review Required';
       recSource = 'Human Review Required';
       recValue = 'N/A';
       confidence = 'LOW';
       ruleApplied = 'Low Reliability Sources';
-    } else if (diff > 10) {
-      recommendation = relA > relB ? nameA : nameB;
-      recSource = relA > relB ? nameA : nameB;
-      recValue = relA > relB ? valA : valB;
+    } 
+    // Rule 2: If one source is significantly more reliable (difference > 10%), trust the higher one.
+    else if (diff > 10) {
+      recommendation = reliabilityA > reliabilityB ? sourceAName : sourceBName;
+      recSource = reliabilityA > reliabilityB ? sourceAName : sourceBName;
+      recValue = reliabilityA > reliabilityB ? valueA : valueB;
       confidence = 'HIGH';
       ruleApplied = 'Higher Reliability Source';
-    } else if (diff >= 5 && diff <= 10) {
+    } 
+    // Rule 3: If reliability scores are a close match (diff between 5% and 10%), require nursing verification.
+    else if (diff >= 5 && diff <= 10) {
       recommendation = 'Verification Required';
       recSource = 'Verification Required';
       recValue = 'N/A';
       confidence = 'MEDIUM';
       ruleApplied = 'Close Reliability Match';
-    } else {
+    } 
+    // Rule 4: If reliability difference is minimal (<5%), flag for immediate manual review.
+    else {
       recommendation = 'Human Review Required';
       recSource = 'Human Review Required';
       recValue = 'N/A';
@@ -554,7 +566,7 @@ app.get('/api/conflicts', (req, res) => {
       ruleApplied = 'Low Confidence Discrepancy';
     }
 
-    const explanation = generateReconciliationExplanation(c, relA, relB, nameA, nameB, valA, valB, diff, ruleApplied, recommendation, confidence);
+    const explanation = generateReconciliationExplanation(c, reliabilityA, reliabilityB, sourceAName, sourceBName, valueA, valueB, diff, ruleApplied, recommendation, confidence);
 
     return {
       ...c,

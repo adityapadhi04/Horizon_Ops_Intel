@@ -64,7 +64,9 @@ export const Predictive = ({ currentUser, activeRole }) => {
   const summary = overview?.summary || {};
   const forecastData = forecast?.forecast || [];
 
-  // Generate 7-day admissions surge projection chart data dynamically
+  // Hackathon Rule-based Prediction Chart Model:
+  // We plot a 7-day forecast by adding the minimum and maximum surge projection factors 
+  // calculated by the backend rules engine onto the historical base admissions (15 cases).
   const minSurge = summary.minPredictedSurge || 2;
   const maxSurge = summary.maxPredictedSurge || 6;
   const baseAdmissions = 15;
