@@ -1,0 +1,376 @@
+{
+  "his": [
+    {
+      "mrn": "48192",
+      "patientName": "Sarah Miller",
+      "status": "Admitted",
+      "timestamp": 1787948400000
+    },
+    {
+      "mrn": "29381",
+      "patientName": "John Davis",
+      "status": "Discharged",
+      "timestamp": 1787953800000
+    },
+    {
+      "mrn": "84920",
+      "patientName": "Robert Chen",
+      "status": "Admitted",
+      "timestamp": 1787959200000
+    },
+    {
+      "mrn": "10928",
+      "patientName": "Emily Taylor",
+      "status": "Discharged",
+      "timestamp": 1787951000000
+    },
+    {
+      "mrn": "74829",
+      "patientName": "Michael Brown",
+      "status": "Admitted",
+      "timestamp": 1787962800000
+    },
+    {
+      "mrn": "58392",
+      "patientName": "Jessica Adams",
+      "status": "Admitted",
+      "timestamp": 1787963700000
+    }
+  ],
+  "lab": [
+    {
+      "mrn": "48192",
+      "testType": "STAT Troponin",
+      "orderTime": 1787962500000,
+      "elapsedTime": 35,
+      "priority": "STAT",
+      "status": "completed"
+    },
+    {
+      "mrn": "84920",
+      "testType": "Routine CBC",
+      "orderTime": 1787961600000,
+      "elapsedTime": 50,
+      "priority": "Routine",
+      "status": "completed"
+    },
+    {
+      "mrn": "58392",
+      "testType": "STAT Metabolic",
+      "orderTime": 1787962200000,
+      "elapsedTime": 2930,
+      "priority": "STAT",
+      "status": "pending"
+    },
+    {
+      "mrn": "74829",
+      "testType": "Routine Lipid",
+      "orderTime": 1787963400000,
+      "elapsedTime": 2910,
+      "priority": "Routine",
+      "status": "pending"
+    }
+  ],
+  "bed": [
+    {
+      "bedId": "Bed-101",
+      "ward": "3A",
+      "mrn": "48192",
+      "occupied": true,
+      "timestamp": 1787948400000
+    },
+    {
+      "bedId": "Bed-102",
+      "ward": "3A",
+      "mrn": null,
+      "occupied": false,
+      "timestamp": 1787919600000
+    },
+    {
+      "bedId": "Bed-302",
+      "ward": "3B",
+      "mrn": "29381",
+      "occupied": true,
+      "timestamp": 1787876400000
+    },
+    {
+      "bedId": "Bed-303",
+      "ward": "3B",
+      "mrn": "84920",
+      "occupied": true,
+      "timestamp": 1787959200000
+    },
+    {
+      "bedId": "Bed-404",
+      "ward": "4C",
+      "mrn": "10928",
+      "occupied": true,
+      "timestamp": 1787898000000
+    },
+    {
+      "bedId": "Bed-405",
+      "ward": "4C",
+      "mrn": "74829",
+      "occupied": true,
+      "timestamp": 1787962800000
+    },
+    {
+      "bedId": "Bed-501",
+      "ward": "5D",
+      "mrn": "58392",
+      "occupied": true,
+      "timestamp": 1787963700000
+    }
+  ],
+  "activeConflicts": [
+    {
+      "id": "CF-2041",
+      "mrn": "29381",
+      "patientName": "John Davis",
+      "type": "Bed Occupancy Mismatch",
+      "severity": "critical",
+      "description": "Patient John Davis is discharged in HIS register, but Ward Bed-302 is still marked as Occupied in nursing log.",
+      "sourceData": {
+        "his": "Discharged",
+        "lab": "Completed",
+        "bed": "Occupied"
+      },
+      "suggestionText": "HIS records discharge and final LIS panels are completed. Discrepancy is likely due to nursing latency in vacating the bed board. Recommendation: Approve HIS status and clear Bed-302.",
+      "confidence": 92,
+      "resolutionOptions": [
+        {
+          "label": "Vacate Bed-302 (Approve HIS)",
+          "actionKey": "approve_his",
+          "recommended": true
+        },
+        {
+          "label": "Re-Admit John Davis (Approve Bed Board)",
+          "actionKey": "approve_bed",
+          "recommended": false
+        }
+      ]
+    },
+    {
+      "id": "CF-2043",
+      "mrn": "10928",
+      "patientName": "Emily Taylor",
+      "type": "Critical Discharge Sync Lag",
+      "severity": "critical",
+      "description": "Patient Emily Taylor discharged in HIS 3 hours ago, but Bed-404 is still marked Occupied. Potential operational bottleneck.",
+      "sourceData": {
+        "his": "Discharged",
+        "lab": "Completed",
+        "bed": "Occupied"
+      },
+      "suggestionText": "Patient has physically left the ward. Bed remains locked due to delayed cleaning reporting. Recommendation: Evict bed board MRN and vacate Bed-404.",
+      "confidence": 96,
+      "resolutionOptions": [
+        {
+          "label": "Evict Bed-404 (Approve HIS)",
+          "actionKey": "approve_his",
+          "recommended": true
+        },
+        {
+          "label": "Restore Admission Status (Approve Bed Board)",
+          "actionKey": "approve_bed",
+          "recommended": false
+        }
+      ]
+    }
+  ],
+  "alerts": [
+    {
+      "id": "alert-auto-tat-1787951564958",
+      "title": "STAT Test Delay Warning",
+      "message": "Patient LIS order (Routine Lipid) elapsed time reaches 60m threshold.",
+      "severity": "warning",
+      "source": "Rules System",
+      "timestamp": 1787951564958
+    },
+    {
+      "id": "al-101",
+      "title": "Data Trust Score dropped below 80",
+      "message": "Overall data trust score has dropped below the threshold of 80% due to repeated manual Bed Board overrides.",
+      "severity": "critical",
+      "details": {
+        "label": "Current Score",
+        "value": "76 / 100"
+      },
+      "actionLabel": "Review Data Sources",
+      "actionKey": "trust",
+      "timestamp": 1787963100000
+    },
+    {
+      "id": "al-102",
+      "title": "Bed Data Conflict Rate Increased",
+      "message": "Discrepancy incidents between HIS and nursing bed logs surged in Ward C.",
+      "severity": "high",
+      "details": {
+        "label": "Location",
+        "value": "Ward C"
+      },
+      "variance": {
+        "label": "Conflict Delta",
+        "value": "4% ➔ 13%"
+      },
+      "actionLabel": "Investigate Pattern",
+      "actionKey": "conflicts",
+      "timestamp": 1787962200000
+    },
+    {
+      "id": "al-103",
+      "title": "Laboratory Turnaround Time Exceeded Threshold",
+      "message": "Average turnaround SLA query limits exceeded for Radiology STAT testing.",
+      "severity": "warning",
+      "details": {
+        "label": "Department",
+        "value": "Radiology"
+      },
+      "stats": {
+        "current": "5.8 hours",
+        "threshold": "5 hours"
+      },
+      "actionLabel": "View Performance",
+      "actionKey": "operations",
+      "timestamp": 1787961000000
+    }
+  ],
+  "auditLog": [
+    {
+      "timestamp": 1787971426758,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:80a3bc34d8f"
+    },
+    {
+      "timestamp": 1787971421357,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:d56f8660d8f"
+    },
+    {
+      "timestamp": 1787971399720,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:e4c6e0b1d8f"
+    },
+    {
+      "timestamp": 1787971394330,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:8bd4e16ad8f"
+    },
+    {
+      "timestamp": 1787971378085,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:0fbe3455d8f"
+    },
+    {
+      "timestamp": 1787971372660,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:4bb98bc5d8f"
+    },
+    {
+      "timestamp": 1787971361836,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:4a69e103d8f"
+    },
+    {
+      "timestamp": 1787971356404,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:9187f22fd8f"
+    },
+    {
+      "timestamp": 1787971329245,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:1bb8652ed8f"
+    },
+    {
+      "timestamp": 1787971312958,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:2a97b493d8f"
+    },
+    {
+      "timestamp": 1787971298988,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:3de68810d8f"
+    },
+    {
+      "timestamp": 1787971266400,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:5cf0ab95d8f"
+    },
+    {
+      "timestamp": 1787971195882,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:1b97638ad8f"
+    },
+    {
+      "timestamp": 1787971179604,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:607e3146d8f"
+    },
+    {
+      "timestamp": 1787971168751,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:99a08440d8f"
+    }
+  ],
+  "trustScores": {
+    "his": 96,
+    "lab": 94,
+    "bed": 79,
+    "overall": 88
+  },
+  "rules": {
+    "bedDischargeThreshold": 2,
+    "labTatThreshold": 60,
+    "primaryPrecedence": "his"
+  },
+  "settings": {
+    "labDelay": false,
+    "bedLag": false,
+    "running": true
+  }
+}

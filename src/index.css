@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-command-base text-text-primary font-sans antialiased overflow-x-hidden;
+    background-image: 
+      radial-gradient(circle at 20% 15%, rgba(34, 211, 238, 0.05) 0%, transparent 45%),
+      radial-gradient(circle at 80% 75%, rgba(139, 92, 246, 0.04) 0%, transparent 45%),
+      linear-gradient(rgba(17, 26, 44, 0.25) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(17, 26, 44, 0.25) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+/* Glassmorphic scrollbar styling */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #070B14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #22d3ee;
+}
+
+/* Custom layout animations */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.12);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.12);
+}
+
+.glass-panel {
+  background: rgba(17, 26, 44, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Tooltip styles */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background-color: #0d1321;
+  color: #f4f7fb;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: normal;
+  width: 240px;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+  line-height: 1.4;
+  border: 1px solid rgba(34, 211, 238, 0.15);
+  text-align: center;
+}
+
+[data-tooltip]:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* Custom micro animations */
+@keyframes pulse-cyan {
+  0%, 100% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 8px rgba(34, 211, 238, 0.3); }
+  50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 16px rgba(34, 211, 238, 0.6); }
+}
+
+.pulse-dot-cyan {
+  animation: pulse-cyan 2s infinite ease-in-out;
+}
