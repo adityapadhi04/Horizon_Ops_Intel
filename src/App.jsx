@@ -16,6 +16,7 @@ import { RuleSandbox } from './views/RuleSandbox';
 import { AlertsView } from './views/AlertsView';
 import { DemoLiveMode } from './views/DemoLiveMode';
 import { SettingsView } from './views/SettingsView';
+import { Predictive } from './views/Predictive';
 
 export const roles = {
   administrator: {
@@ -75,10 +76,10 @@ export const App = () => {
   // Restricted Routing Redirect checks
   useEffect(() => {
     const allowedMap = {
-      administrator: ['overview', 'operations', 'reconciliation', 'conflicts', 'trust', 'audit', 'sandbox', 'alerts', 'demo', 'settings'],
-      nursing: ['overview', 'operations', 'reconciliation', 'alerts', 'audit', 'demo'],
-      bedManager: ['overview', 'operations', 'reconciliation', 'alerts', 'demo'],
-      dataAdmin: ['overview', 'reconciliation', 'conflicts', 'trust', 'audit', 'sandbox', 'alerts', 'settings', 'demo']
+      administrator: ['overview', 'operations', 'reconciliation', 'conflicts', 'trust', 'audit', 'sandbox', 'alerts', 'demo', 'settings', 'predictive'],
+      nursing: ['overview', 'operations', 'reconciliation', 'alerts', 'audit', 'demo', 'predictive'],
+      bedManager: ['overview', 'operations', 'reconciliation', 'alerts', 'demo', 'predictive'],
+      dataAdmin: ['overview', 'reconciliation', 'conflicts', 'trust', 'audit', 'sandbox', 'alerts', 'settings', 'demo', 'predictive']
     };
     const allowed = allowedMap[activeRole] || allowedMap.administrator;
     if (!allowed.includes(currentTab)) {
@@ -133,6 +134,9 @@ export const App = () => {
         break;
       case 'settings':
         view = <SettingsView setCurrentTab={setCurrentTab} currentUser={currentUser} activeRole={activeRole} />;
+        break;
+      case 'predictive':
+        view = <Predictive currentUser={currentUser} activeRole={activeRole} />;
         break;
       default:
         view = <Overview setCurrentTab={setCurrentTab} currentUser={currentUser} activeRole={activeRole} />;

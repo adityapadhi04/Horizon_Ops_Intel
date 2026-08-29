@@ -58,7 +58,7 @@
       "mrn": "58392",
       "testType": "STAT Metabolic",
       "orderTime": 1787962200000,
-      "elapsedTime": 2930,
+      "elapsedTime": 2948,
       "priority": "STAT",
       "status": "pending"
     },
@@ -66,7 +66,7 @@
       "mrn": "74829",
       "testType": "Routine Lipid",
       "orderTime": 1787963400000,
-      "elapsedTime": 2910,
+      "elapsedTime": 2928,
       "priority": "Routine",
       "status": "pending"
     }
@@ -237,6 +237,22 @@
   ],
   "auditLog": [
     {
+      "timestamp": 1787976457353,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:bd784c6ed8f"
+    },
+    {
+      "timestamp": 1787976403559,
+      "action": "Dynamic Heartbeat Sync",
+      "target": "Background Daemon",
+      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
+      "resolvedBy": "System Daemon",
+      "hash": "sha256:bc7308d6d8f"
+    },
+    {
       "timestamp": 1787971426758,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
@@ -339,22 +355,6 @@
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
       "hash": "sha256:1b97638ad8f"
-    },
-    {
-      "timestamp": 1787971179604,
-      "action": "Dynamic Heartbeat Sync",
-      "target": "Background Daemon",
-      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
-      "resolvedBy": "System Daemon",
-      "hash": "sha256:607e3146d8f"
-    },
-    {
-      "timestamp": 1787971168751,
-      "action": "Dynamic Heartbeat Sync",
-      "target": "Background Daemon",
-      "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
-      "resolvedBy": "System Daemon",
-      "hash": "sha256:99a08440d8f"
     }
   ],
   "trustScores": {
@@ -372,5 +372,60 @@
     "labDelay": false,
     "bedLag": false,
     "running": true
-  }
+  },
+  "predictiveSeason": "Rainy",
+  "predictiveClusters": [
+    {
+      "id": "cluster_1",
+      "area": "Patia",
+      "disease": "Dengue",
+      "cases": 27,
+      "trend": "Increasing",
+      "risk": "High",
+      "lastUpdated": 1787963700000
+    },
+    {
+      "id": "cluster_2",
+      "area": "Chandrasekharpur",
+      "disease": "Viral Fever",
+      "cases": 18,
+      "trend": "Increasing",
+      "risk": "Medium",
+      "lastUpdated": 1787963700000
+    }
+  ],
+  "predictiveInventory": [
+    {
+      "id": "inv_1",
+      "item": "IV Fluids",
+      "available": 120,
+      "required": 150,
+      "unit": "bags",
+      "status": "Warning"
+    },
+    {
+      "id": "inv_2",
+      "item": "Paracetamol",
+      "available": 500,
+      "required": 400,
+      "unit": "tablets",
+      "status": "Safe"
+    },
+    {
+      "id": "inv_3",
+      "item": "Dengue Test Kits",
+      "available": 15,
+      "required": 50,
+      "unit": "kits",
+      "status": "Critical"
+    },
+    {
+      "id": "inv_4",
+      "item": "IV Cannulas",
+      "available": 200,
+      "required": 180,
+      "unit": "units",
+      "status": "Safe"
+    }
+  ]
 }

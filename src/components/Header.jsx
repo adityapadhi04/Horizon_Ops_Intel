@@ -7,7 +7,11 @@ export const Header = ({
   onTriggerSync, 
   syncing = false,
   onOpenAlerts,
-  currentTab
+  currentTab,
+  activeRole,
+  currentUser,
+  roles = {},
+  onRoleChange
 }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
@@ -22,7 +26,8 @@ export const Header = ({
       sandbox: 'Rule Sandbox',
       alerts: 'Alerts',
       demo: 'Demo Live',
-      settings: 'Settings'
+      settings: 'Settings',
+      predictive: 'Predictive Intelligence'
     };
     return labels[tabId] || tabId;
   };
@@ -89,32 +94,53 @@ export const Header = ({
         <div className="relative">
           <button 
             onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-            className="w-8 h-8 rounded-lg bg-accent-blue/20 border border-accent-blue/40 text-accent-blue hover:border-accent-blue/60 flex items-center justify-center font-bold text-sm shadow-sm transition-all focus:outline-none"
+            className="w-8 h-8 rounded-lg bg-accent-blue/20 border border-accent-blue/40 text-accent-blue hover:border-accent-blue/60 flex items-center justify-center font-bold text-xs shadow-sm transition-all focus:outline-none"
+            title={`Active Role: ${currentUser?.role || 'Hospital Administrator'}`}
           >
-            SJ
+            {currentUser?.initials || 'AP'}
           </button>
           
           {showProfileDropdown && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/5 bg-command-secondary/95 shadow-2xl backdrop-blur-xl p-2 z-50 animate-fade-in">
-              <div className="p-3">
-                <p className="text-xs font-semibold text-text-primary">Sarah Jenkins</p>
-                <p className="text-[10px] text-text-secondary">s.jenkins@horizon.org</p>
+            <div className="absolute right-0 mt-2 w-64 rounded-xl border border-white/5 bg-command-secondary/95 shadow-2xl backdrop-blur-xl p-2.5 z-50 animate-fade-in">
+              <div className="p-2 border-b border-white/5 mb-2">
+                <p className="text-xs font-bold text-text-primary">{currentUser?.name || 'Aditya Parhi'}</p>
+                <p className="text-[10px] text-text-secondary">{currentUser?.role || 'Hospital Administrator'}</p>
               </div>
-              <div className="h-px bg-white/5 my-1" />
-              <button 
-                onClick={() => { setShowProfileDropdown(false); }}
-                className="w-full text-left flex items-center gap-2.5 px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-white/5 rounded-lg transition-all"
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>Administrator Profile</span>
-              </button>
-              <button 
-                onClick={() => { setShowProfileDropdown(false); }}
-                className="w-full text-left flex items-center gap-2.5 px-3 py-2 text-xs text-danger-red hover:bg-danger-red/10 rounded-lg transition-all"
-              >
-                <Terminal className="w-3.5 h-3.5" />
-                <span>Console Log Out</span>
-              </button>
+              
+              <div className="flex flex-col gap-1">
+                <p className="text-[9px] font-extrabold text-accent-cyan uppercase tracking-wider px-2 py-0.5 select-none">Switch Active Persona</p>
+                {Object.keys(roles).map((key) => {
+                  const roleItem = roles[key];
+                  const isCurrent = activeRole === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        if (onRoleChange) onRoleChange(key);
+                        setShowProfileDropdown(false);
+                      }}
+                      className={`w-full text-left flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all border ${
+                        isCurrent 
+                          ? 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/20 font-bold' 
+                          : 'text-text-secondary border-transparent hover:text-text-primary hover:bg-white/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold ${
+                          isCurrent ? 'bg-accent-cyan/20 text-accent-cyan' : 'bg-white/5 text-text-secondary'
+                        }`}>
+                          {roleItem.initials}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs leading-none">{roleItem.name}</span>
+                          <span className="text-[8px] opacity-70 mt-0.5">{roleItem.role}</span>
+                        </div>
+                      </div>
+                      {isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan glow-cyan" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

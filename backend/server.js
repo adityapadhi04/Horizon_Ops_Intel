@@ -16,7 +16,51 @@ app.use(express.json());
 function readDB() {
   try {
     const raw = fs.readFileSync(DB_PATH, 'utf8');
-    return JSON.parse(raw);
+    const db = JSON.parse(raw);
+    
+    // Add default values for predictive intelligence keys if they are missing
+    let changed = false;
+    if (!db.predictiveSeason) {
+      db.predictiveSeason = 'Rainy';
+      changed = true;
+    }
+    if (!db.predictiveClusters) {
+      db.predictiveClusters = [
+        {
+          id: "cluster_1",
+          area: "Patia",
+          disease: "Dengue",
+          cases: 27,
+          trend: "Increasing",
+          risk: "High",
+          lastUpdated: Date.now()
+        },
+        {
+          id: "cluster_2",
+          area: "Chandrasekharpur",
+          disease: "Viral Fever",
+          cases: 18,
+          trend: "Increasing",
+          risk: "Medium",
+          lastUpdated: Date.now()
+        }
+      ];
+      changed = true;
+    }
+    if (!db.predictiveInventory) {
+      db.predictiveInventory = [
+        {"id": "inv_1", "item": "IV Fluids", "available": 120, "required": 150, "unit": "bags", "status": "Warning"},
+        {"id": "inv_2", "item": "Paracetamol", "available": 500, "required": 400, "unit": "tablets", "status": "Safe"},
+        {"id": "inv_3", "item": "Dengue Test Kits", "available": 15, "required": 50, "unit": "kits", "status": "Critical"},
+        {"id": "inv_4", "item": "IV Cannulas", "available": 200, "required": 180, "unit": "units", "status": "Safe"}
+      ];
+      changed = true;
+    }
+    if (changed) {
+      fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+    }
+    
+    return db;
   } catch (err) {
     console.error("Error reading database:", err);
     return {};
@@ -59,7 +103,10 @@ function getRecommendedAction(type) {
     CONFLICT_THRESHOLD: 'Review patient ledger list overrides and merge records.',
     LAB_DELAY: 'Review delayed laboratory workflow and turnaround SLA limits.',
     LOW_TRUST_SCORE: 'Review Nursing Bed Board overrides and recalibrate sources weightings.',
-    BED_CAPACITY: 'Coordinate capacity limits and patient transfers with neighboring clinics.'
+    BED_CAPACITY: 'Coordinate capacity limits and patient transfers with neighboring clinics.',
+    PREDICTIVE_CLUSTER: 'Review geographical disease clusters and dispatch community health workers.',
+    PREDICTIVE_BED_SHORTAGE: 'Accelerate patient discharge turnaround or coordinate diversion with local clinics.',
+    PREDICTIVE_MEDICINE_SHORTAGE: 'Approve emergency supply chain order for depleted medications.'
   };
   return actions[type] || 'Review system logs for details.';
 }
@@ -167,9 +214,236 @@ function evaluateAlerts(db) {
   } else {
     resolveAlertByType(db, 'BED_CAPACITY');
   }
+
+  // 5. Predictive High-Risk Disease Cluster Alert
+  const clusters = db.predictiveClusters || [];
+  const highRiskCluster = clusters.find(c => c.risk === 'High');
+  if (highRiskCluster) {
+    createOrUpdateAlert(db, {
+      type: 'PREDICTIVE_CLUSTER',
+      title: 'High-Risk Disease Cluster Detected',
+      description: `${highRiskCluster.area} has ${highRiskCluster.cases} active cases of ${highRiskCluster.disease} (${highRiskCluster.trend} trend).`,
+      severity: 'HIGH'
+    });
+  } else {
+    resolveAlertByType(db, 'PREDICTIVE_CLUSTER');
+  }
+
+  // 6. Predictive Bed Shortage Alert
+  const highRiskCount = clusters.filter(c => c.risk === 'High').length;
+  const mediumRiskCount = clusters.filter(c => c.risk === 'Medium').length;
+  let clusterSurgeFactor = (highRiskCount * 5) + (mediumRiskCount * 2);
+  let seasonalSurgeFactor = 0;
+  const season = db.predictiveSeason || 'Rainy';
+  if (season === 'Rainy') seasonalSurgeFactor = 8;
+  else if (season === 'Winter') seasonalSurgeFactor = 5;
+  else if (season === 'Summer') seasonalSurgeFactor = 3;
+  const predictedAdmissionsDelta = Math.round(clusterSurgeFactor + seasonalSurgeFactor);
+  const minPredictedSurge = Math.max(2, predictedAdmissionsDelta - 3);
+  const maxPredictedSurge = predictedAdmissionsDelta + 3;
+
+  if (availableBeds < minPredictedSurge) {
+    createOrUpdateAlert(db, {
+      type: 'PREDICTIVE_BED_SHORTAGE',
+      title: 'Predicted Patient Surge Exceeds Bed Capacity',
+      description: `Predicted surge is ${minPredictedSurge}-${maxPredictedSurge} additional beds, but only ${availableBeds} beds are available.`,
+      severity: 'CRITICAL'
+    });
+  } else {
+    resolveAlertByType(db, 'PREDICTIVE_BED_SHORTAGE');
+  }
+
+  // 7. Predictive Medicine Shortage Alert
+  const inventory = db.predictiveInventory || [];
+  const criticalItems = inventory.filter(item => item.available < item.required && (item.available / item.required) < 0.5);
+  if (criticalItems.length > 0) {
+    createOrUpdateAlert(db, {
+      type: 'PREDICTIVE_MEDICINE_SHORTAGE',
+      title: 'Critical Medicine Shortage Detected',
+      description: `Depleted supplies: ${criticalItems.map(i => `${i.item} (${i.available}/${i.required})`).join(', ')}.`,
+      severity: 'HIGH'
+    });
+  } else {
+    resolveAlertByType(db, 'PREDICTIVE_MEDICINE_SHORTAGE');
+  }
+}
+
+// Helper for Predictive Overview calculation
+function getPredictiveOverview(db) {
+  const availableBeds = db.bed.filter(b => !b.occupied).length;
+  
+  const activeClusters = db.predictiveClusters || [];
+  const highRiskCount = activeClusters.filter(c => c.risk === 'High').length;
+  const mediumRiskCount = activeClusters.filter(c => c.risk === 'Medium').length;
+  
+  const currentDailyAdmissions = 12 + db.his.filter(p => p.status === 'Admitted').length; 
+  
+  let clusterSurgeFactor = (highRiskCount * 5) + (mediumRiskCount * 2);
+  let seasonalSurgeFactor = 0;
+  const season = db.predictiveSeason || 'Rainy';
+  if (season === 'Rainy') {
+    seasonalSurgeFactor = 8;
+  } else if (season === 'Winter') {
+    seasonalSurgeFactor = 5;
+  } else if (season === 'Summer') {
+    seasonalSurgeFactor = 3;
+  }
+  
+  const predictedAdmissionsDelta = Math.round(clusterSurgeFactor + seasonalSurgeFactor);
+  const minPredictedSurge = Math.max(2, predictedAdmissionsDelta - 3);
+  const maxPredictedSurge = predictedAdmissionsDelta + 3;
+  
+  const percentageIncrease = Math.round((predictedAdmissionsDelta / currentDailyAdmissions) * 100) || 0;
+  
+  let surgeRiskLevel = 'Safe';
+  if (percentageIncrease > 50) {
+    surgeRiskLevel = 'Critical';
+  } else if (percentageIncrease > 25) {
+    surgeRiskLevel = 'Warning';
+  } else if (percentageIncrease > 10) {
+    surgeRiskLevel = 'Attention';
+  }
+  
+  let bedStatus = 'Safe';
+  let bedMessage = 'Capacity is sufficient.';
+  if (availableBeds < minPredictedSurge) {
+    bedStatus = 'Critical';
+    bedMessage = 'Immediate shortage; demand exceeds available beds.';
+  } else if (availableBeds < maxPredictedSurge) {
+    bedStatus = 'Warning';
+    bedMessage = 'Possible capacity shortage under peak surge.';
+  } else if (availableBeds < maxPredictedSurge + 5) {
+    bedStatus = 'Attention';
+    bedMessage = 'Tight bed availability; monitor admissions closely.';
+  }
+  
+  const inventory = db.predictiveInventory || [];
+  const criticalItems = inventory.filter(item => item.available < item.required && (item.available / item.required) < 0.5);
+  const warningItems = inventory.filter(item => item.available < item.required && (item.available / item.required) >= 0.5);
+  
+  let inventoryStatus = 'Safe';
+  if (criticalItems.length > 0) {
+    inventoryStatus = 'Critical';
+  } else if (warningItems.length > 0) {
+    inventoryStatus = 'Warning';
+  }
+  
+  return {
+    activeClustersCount: activeClusters.length,
+    highRiskClustersCount: highRiskCount,
+    predictedDailySurge: `${minPredictedSurge}-${maxPredictedSurge}`,
+    percentageIncrease,
+    surgeRiskLevel,
+    availableBeds,
+    minPredictedSurge,
+    maxPredictedSurge,
+    bedStatus,
+    bedMessage,
+    inventoryStatus,
+    inventoryCount: inventory.length,
+    criticalInventoryItems: criticalItems.length
+  };
 }
 
 // REST API endpoints
+
+// Predictive Overview
+app.get('/api/predictive/overview', (req, res) => {
+  const db = readDB();
+  const summary = getPredictiveOverview(db);
+  
+  const clusters = db.predictiveClusters || [];
+  const inventory = db.predictiveInventory || [];
+  const criticalItems = inventory.filter(item => item.available < item.required && (item.available / item.required) < 0.5);
+  
+  const recommendations = {
+    administrator: [
+      summary.bedStatus === 'Critical' || summary.bedStatus === 'Warning' 
+        ? "🚨 Coordinate emergency bed transfers with local healthcare clinics." 
+        : "🏥 Bed capacity level is healthy. Maintain current intake rates.",
+      criticalItems.length > 0 
+        ? `💊 Authorize immediate budget to replenish: ${criticalItems.map(i => i.item).join(', ')}.` 
+        : "✅ Pharmacy supply lines are sufficient. Normal procurement ongoing.",
+      "📋 Conduct daily multi-departmental preparedness check-ins."
+    ],
+    nursing: [
+      summary.bedStatus === 'Critical' || summary.bedStatus === 'Warning'
+        ? "👩⚕️ Adjust nurse staffing rosters to handle high ward admissions."
+        : "✅ Nurse staffing ratios nominal for current admissions.",
+      clusters.some(c => c.disease === 'Dengue')
+        ? "🦠 Review clinical protocols for Dengue fever treatment with duty teams."
+        : "📋 Carry out regular nursing competency updates.",
+      "⚠️ Verify bedside medical supplies replenishment schedules in Ward C."
+    ],
+    bedManager: [
+      summary.bedStatus === 'Critical' || summary.bedStatus === 'Warning'
+        ? "🛏️ Initiate urgent bed cleaning sweeps to minimize lag."
+        : "✅ Bed cleaning schedules nominal. Keep turnaround times below 45m.",
+      "🚪 Prioritize discharge reviews for stable patients in Wards 3A and 3B.",
+      "📊 Report real-time bed board status updates to nursing desks hourly."
+    ],
+    dataAdmin: [
+      clusters.length > 0
+        ? `💻 Calibrate HIS alerts to trace new cases from: ${clusters.map(c => c.area).join(', ')}.`
+        : "✅ Epidemiological surveillance nominal. No active disease spikes.",
+      "⚡ Verify HIS-to-LIS web sockets latency status (target < 5 seconds).",
+      "🔍 Inspect Bed Board manual sync overrides log for discrepancies."
+    ]
+  };
+
+  res.json({
+    summary,
+    recommendations
+  });
+});
+
+// Clusters list
+app.get('/api/predictive/clusters', (req, res) => {
+  const db = readDB();
+  res.json(db.predictiveClusters || []);
+});
+
+// Seasonal Forecast
+app.get('/api/predictive/forecast', (req, res) => {
+  const db = readDB();
+  const season = db.predictiveSeason || 'Rainy';
+  
+  const risks = {
+    Rainy: [
+      { disease: 'Dengue', risk: 'High', historicalRate: '+45%', trend: 'Increasing' },
+      { disease: 'Malaria', risk: 'High', historicalRate: '+30%', trend: 'Increasing' },
+      { disease: 'Viral Fever', risk: 'Medium', historicalRate: '+15%', trend: 'Stable' }
+    ],
+    Summer: [
+      { disease: 'Heat Stroke', risk: 'High', historicalRate: '+60%', trend: 'Increasing' },
+      { disease: 'Dehydration', risk: 'Medium', historicalRate: '+40%', trend: 'Stable' },
+      { disease: 'Gastroenteritis', risk: 'Medium', historicalRate: '+20%', trend: 'Increasing' }
+    ],
+    Winter: [
+      { disease: 'Influenza', risk: 'High', historicalRate: '+50%', trend: 'Increasing' },
+      { disease: 'Bronchitis', risk: 'Medium', historicalRate: '+35%', trend: 'Increasing' },
+      { disease: 'Asthma Exacerbation', risk: 'Medium', historicalRate: '+25%', trend: 'Stable' }
+    ]
+  };
+
+  res.json({
+    season,
+    forecast: risks[season] || risks.Rainy
+  });
+});
+
+// Preparedness detailed status
+app.get('/api/predictive/preparedness', (req, res) => {
+  const db = readDB();
+  const availableBeds = db.bed.filter(b => !b.occupied).length;
+  const inventory = db.predictiveInventory || [];
+  
+  res.json({
+    availableBeds,
+    inventory
+  });
+});
+
 
 // 1. Overview data aggregator
 app.get('/api/overview', (req, res) => {
@@ -696,6 +970,67 @@ app.post('/api/demo/event', (req, res) => {
       db.trustScores.bed = Math.min(db.trustScores.bed + 3, 98);
       db.trustScores.overall = Math.min(db.trustScores.overall + 2, 99);
     }
+  } else if (eventType === 'disease_cluster') {
+    db.predictiveClusters = [
+      { id: 'cluster_1', area: 'Patia', disease: 'Dengue', cases: 32, trend: 'Increasing', risk: 'High', lastUpdated: Date.now() },
+      { id: 'cluster_2', area: 'Chandrasekharpur', disease: 'Viral Fever', cases: 22, trend: 'Increasing', risk: 'Medium', lastUpdated: Date.now() },
+      { id: 'cluster_3', area: 'Nayapalli', disease: 'Malaria', cases: 14, trend: 'Increasing', risk: 'Medium', lastUpdated: Date.now() }
+    ];
+    createAuditEvent(db, {
+      eventType: 'DISEASE_CLUSTER_DETECTED',
+      title: 'Epidemiology Shift Triggered',
+      description: 'Active Dengue cluster identified in Patia. Incident rates exceed standard limits.',
+      actor: 'Bio-Surveillance Engine',
+      severity: 'warning'
+    });
+
+  } else if (eventType === 'seasonal_surge') {
+    db.predictiveSeason = 'Rainy';
+    db.predictiveClusters = (db.predictiveClusters || []).map(c => {
+      if (c.disease === 'Dengue' || c.disease === 'Malaria') {
+        return { ...c, cases: c.cases + 5, trend: 'Increasing', risk: 'High', lastUpdated: Date.now() };
+      }
+      return c;
+    });
+    createAuditEvent(db, {
+      eventType: 'SEASONAL_CALIBRATION',
+      title: 'Seasonal Forecast Calibrated',
+      description: 'System set to Rainy Season. Raising Dengue and Malaria projection factors.',
+      actor: 'Meteorological Integration',
+      severity: 'info'
+    });
+
+  } else if (eventType === 'medicine_shortage') {
+    db.predictiveInventory = [
+      {"id": "inv_1", "item": "IV Fluids", "available": 12, "required": 150, "unit": "bags", "status": "Critical"},
+      {"id": "inv_2", "item": "Paracetamol", "available": 450, "required": 400, "unit": "tablets", "status": "Safe"},
+      {"id": "inv_3", "item": "Dengue Test Kits", "available": 2, "required": 50, "unit": "kits", "status": "Critical"},
+      {"id": "inv_4", "item": "IV Cannulas", "available": 190, "required": 180, "unit": "units", "status": "Safe"}
+    ];
+    createAuditEvent(db, {
+      eventType: 'SUPPLY_SHORTAGE_DETECTED',
+      title: 'Critical Inventory Shortage',
+      description: 'IV Fluids and Dengue Test Kits fell below critical safety stock baseline.',
+      actor: 'Supply Chain Tracker',
+      severity: 'critical'
+    });
+
+  } else if (eventType === 'patient_surge') {
+    let count = 0;
+    db.bed = db.bed.map(b => {
+      if (!b.occupied && count < 4) {
+        count++;
+        return { ...b, occupied: true, mrn: 'MOCK_SURGE_' + count, timestamp: Date.now() };
+      }
+      return b;
+    });
+    createAuditEvent(db, {
+      eventType: 'WARD_SURGE_STRAIN',
+      title: 'Patient Surge Detected',
+      description: 'Incoming admissions filled emergency and ward beds. Available capacity strained.',
+      actor: 'HIS Admissions Monitor',
+      severity: 'critical'
+    });
   }
 
   evaluateAlerts(db);
@@ -819,7 +1154,34 @@ app.post('/api/demo/reset', (req, res) => {
       labDelay: false,
       bedLag: false,
       running: true
-    }
+    },
+    predictiveSeason: 'Rainy',
+    predictiveClusters: [
+      {
+        id: "cluster_1",
+        area: "Patia",
+        disease: "Dengue",
+        cases: 27,
+        trend: "Increasing",
+        risk: "High",
+        lastUpdated: Date.now()
+      },
+      {
+        id: "cluster_2",
+        area: "Chandrasekharpur",
+        disease: "Viral Fever",
+        cases: 18,
+        trend: "Increasing",
+        risk: "Medium",
+        lastUpdated: Date.now()
+      }
+    ],
+    predictiveInventory: [
+      {"id": "inv_1", "item": "IV Fluids", "available": 120, "required": 150, "unit": "bags", "status": "Warning"},
+      {"id": "inv_2", "item": "Paracetamol", "available": 500, "required": 400, "unit": "tablets", "status": "Safe"},
+      {"id": "inv_3", "item": "Dengue Test Kits", "available": 15, "required": 50, "unit": "kits", "status": "Critical"},
+      {"id": "inv_4", "item": "IV Cannulas", "available": 200, "required": 180, "unit": "units", "status": "Safe"}
+    ]
   };
 
   createAuditEvent(defaultDb, {

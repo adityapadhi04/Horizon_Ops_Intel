@@ -22,6 +22,7 @@ const sidebarItems = [
   { id: 'overview', label: 'Overview', icon: Activity },
   { id: 'operations', label: 'Operations', icon: TrendingUp },
   { id: 'reconciliation', label: 'Reconciliation', icon: GitCompare },
+  { id: 'predictive', label: 'Predictive Intelligence', icon: Sparkles },
   { id: 'conflicts', label: 'Conflict Intelligence', icon: Brain, badge: true },
   { id: 'trust', label: 'Trust Center', icon: ShieldCheck },
   { id: 'audit', label: 'Audit Trail', icon: History },
@@ -151,16 +152,56 @@ export const Sidebar = ({
       </div>
 
       {/* Footer Profile card */}
-      <div className="p-3 border-t border-white/5 bg-command-secondary/50">
+      <div className="p-3 border-t border-white/5 bg-command-secondary/50 relative">
+        {/* Role switching dropdown */}
+        {showRoleDropdown && !collapsed && (
+          <div className="absolute bottom-16 left-3 right-3 rounded-xl border border-white/5 bg-command-secondary/95 shadow-2xl backdrop-blur-xl p-2 z-50 animate-fade-in flex flex-col gap-1">
+            <p className="text-[9px] font-extrabold text-accent-cyan uppercase tracking-wider px-2 py-1 select-none">Switch Persona</p>
+            {Object.keys(roles).map((key) => {
+              const roleItem = roles[key];
+              const isCurrent = activeRole === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => {
+                    if (onRoleChange) onRoleChange(key);
+                    setShowRoleDropdown(false);
+                  }}
+                  className={`w-full text-left flex items-center justify-between px-2 py-1.5 rounded-lg transition-all border ${
+                    isCurrent 
+                      ? 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/25 font-bold' 
+                      : 'text-text-secondary border-transparent hover:text-text-primary hover:bg-white/5'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold ${
+                      isCurrent ? 'bg-accent-cyan/20 text-accent-cyan' : 'bg-white/5 text-text-secondary'
+                    }`}>
+                      {roleItem.initials}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] leading-none">{roleItem.name}</span>
+                      <span className="text-[8px] opacity-70 mt-0.5">{roleItem.role}</span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {!collapsed ? (
-          <div className="flex flex-col gap-3">
+          <div 
+            onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+            className="flex flex-col gap-3 cursor-pointer hover:bg-white/[0.02] p-1.5 rounded-lg transition-all"
+          >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-accent-cyan/15 border border-accent-cyan/30 flex items-center justify-center font-bold text-accent-cyan text-sm shadow-sm select-none">
-                OL
+                {currentUser?.initials || 'AP'}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-semibold text-text-primary truncate">Operations Lead</span>
-                <span className="text-[10px] text-text-secondary truncate">Hospital Administrator</span>
+                <span className="text-xs font-semibold text-text-primary truncate">{currentUser?.name || 'Aditya Parhi'}</span>
+                <span className="text-[10px] text-text-secondary truncate">{currentUser?.role || 'Hospital Administrator'}</span>
               </div>
             </div>
             
@@ -174,9 +215,15 @@ export const Sidebar = ({
           <div className="flex flex-col items-center gap-2">
             <div 
               className="w-9 h-9 rounded-lg bg-accent-cyan/15 border border-accent-cyan/30 flex items-center justify-center font-bold text-accent-cyan text-sm cursor-pointer"
-              title="Operations Lead (Hospital Administrator)"
+              title={`${currentUser?.name} (${currentUser?.role})`}
+              onClick={() => {
+                const roleKeys = Object.keys(roles);
+                const currentIndex = roleKeys.indexOf(activeRole);
+                const nextIndex = (currentIndex + 1) % roleKeys.length;
+                if (onRoleChange) onRoleChange(roleKeys[nextIndex]);
+              }}
             >
-              OL
+              {currentUser?.initials || 'AP'}
             </div>
             <span className="w-2 h-2 rounded-full bg-success-green animate-pulse" title="All Systems Operational" />
           </div>

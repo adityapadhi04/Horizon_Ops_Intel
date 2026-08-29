@@ -105,6 +105,9 @@ export const AlertsView = ({ setCurrentTab, currentUser, activeRole }) => {
     if (a.message.includes('Ward C') || a.message.includes('C-204')) dept = 'Ward C';
     if (a.message.includes('Radiology') || a.title.includes('Lab') || a.message.includes('Lab')) dept = 'Laboratory';
     if (a.message.includes('Trust')) dept = 'Trust Center';
+    if (a.title.includes('Cluster') || a.message.includes('Cluster')) dept = 'Epidemiology';
+    if (a.title.includes('Surge') || a.message.includes('Surge')) dept = 'Capacity Management';
+    if (a.title.includes('Shortage') || a.message.includes('Shortage')) dept = 'Pharmacy / Supplies';
 
     return {
       id: a.id,

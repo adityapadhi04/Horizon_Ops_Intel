@@ -165,6 +165,52 @@ export const DemoLiveMode = () => {
         </CardContent>
       </Card>
 
+      {/* Predictive Intelligence Simulations */}
+      <Card className="border-accent-blue/20">
+        <CardHeader>
+          <CardTitle>Predictive Intelligence Simulations</CardTitle>
+          <CardDescription>Simulate epidemiological patterns, seasonal variations, and resource bottlenecks</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <Button 
+              size="sm"
+              variant="outline"
+              onClick={() => handleSimulate('disease_cluster', 'Simulating Dengue disease cluster in Patia...', 'warning')}
+              icon={Sparkles}
+            >
+              🦠 Disease Cluster
+            </Button>
+            <Button 
+              size="sm"
+              variant="outline"
+              onClick={() => handleSimulate('seasonal_surge', 'Simulating Rainy Season Dengue surge...', 'info')}
+              icon={Sparkles}
+            >
+              🌧️ Seasonal Surge
+            </Button>
+            <Button 
+              size="sm"
+              variant="outline"
+              onClick={() => handleSimulate('medicine_shortage', 'Simulating IV Fluids & Test Kits shortage...', 'critical')}
+              icon={Sparkles}
+              className="border-danger-red/20 text-danger-red hover:border-danger-red/40"
+            >
+              💊 Medicine Shortage
+            </Button>
+            <Button 
+              size="sm"
+              variant="outline"
+              onClick={() => handleSimulate('patient_surge', 'Simulating Emergency Ward admissions surge...', 'critical')}
+              icon={Sparkles}
+              className="border-danger-red/20 text-danger-red hover:border-danger-red/40"
+            >
+              🏥 Patient Surge
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Visual Pipeline cascades */}
       <Card>
         <CardHeader>
