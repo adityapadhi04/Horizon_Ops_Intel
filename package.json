@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "client": "vite",
-    "server": "nodemon backend/server.js",
+    "server": "nodemon --ignore backend/data/db.json backend/server.js",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
