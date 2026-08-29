@@ -58,7 +58,7 @@
       "mrn": "58392",
       "testType": "STAT Metabolic",
       "orderTime": 1787962200000,
-      "elapsedTime": 3331,
+      "elapsedTime": 3476,
       "priority": "STAT",
       "status": "pending"
     },
@@ -66,7 +66,7 @@
       "mrn": "74829",
       "testType": "Routine Lipid",
       "orderTime": 1787963400000,
-      "elapsedTime": 3311,
+      "elapsedTime": 3456,
       "priority": "Routine",
       "status": "pending"
     }
@@ -237,124 +237,124 @@
   ],
   "auditLog": [
     {
-      "timestamp": 1787978684954,
+      "timestamp": 1787979470689,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:bf297d98d8f"
+      "hash": "sha256:4c0bb414d8f"
     },
     {
-      "timestamp": 1787978664912,
+      "timestamp": 1787979465686,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:33ed0bedd8f"
+      "hash": "sha256:6fb33bd5d8f"
     },
     {
-      "timestamp": 1787978654898,
+      "timestamp": 1787979435632,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:a33a4232d8f"
+      "hash": "sha256:4d444fd9d8f"
     },
     {
-      "timestamp": 1787978634862,
+      "timestamp": 1787979425631,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:6c76ea71d8f"
+      "hash": "sha256:5ccafe07d8f"
     },
     {
-      "timestamp": 1787978624833,
+      "timestamp": 1787979395611,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:f8834cb9d8f"
+      "hash": "sha256:84db9e64d8f"
     },
     {
-      "timestamp": 1787978609821,
+      "timestamp": 1787979380607,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:331b249ad8f"
+      "hash": "sha256:7c337de8d8f"
     },
     {
-      "timestamp": 1787978559773,
+      "timestamp": 1787979365585,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:4a2d787bd8f"
+      "hash": "sha256:4a4ca23fd8f"
     },
     {
-      "timestamp": 1787978534740,
+      "timestamp": 1787979360578,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:3b4d4538d8f"
+      "hash": "sha256:4c60786cd8f"
     },
     {
-      "timestamp": 1787978504705,
+      "timestamp": 1787979345565,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:050d77b0d8f"
+      "hash": "sha256:fbc1f422d8f"
     },
     {
-      "timestamp": 1787978484676,
+      "timestamp": 1787979320519,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:d97e52d5d8f"
+      "hash": "sha256:9166fe1ad8f"
     },
     {
-      "timestamp": 1787978479660,
+      "timestamp": 1787979305501,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:92c78a69d8f"
+      "hash": "sha256:76d6c33ed8f"
     },
     {
-      "timestamp": 1787978464629,
+      "timestamp": 1787979295498,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:bf2d7a0dd8f"
+      "hash": "sha256:74df691fd8f"
     },
     {
-      "timestamp": 1787978454612,
+      "timestamp": 1787979245438,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:b93019edd8f"
+      "hash": "sha256:f15d036bd8f"
     },
     {
-      "timestamp": 1787978444600,
+      "timestamp": 1787979195382,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:fd7387f4d8f"
+      "hash": "sha256:98db7faad8f"
     },
     {
-      "timestamp": 1787978439600,
+      "timestamp": 1787979190367,
       "action": "Dynamic Heartbeat Sync",
       "target": "Background Daemon",
       "details": "Reconciliation engine scanned 3 operational data streams. 0 new discrepancies found. Sync latency nominal.",
       "resolvedBy": "System Daemon",
-      "hash": "sha256:257a3898d8f"
+      "hash": "sha256:4633dfddd8f"
     }
   ],
   "trustScores": {
